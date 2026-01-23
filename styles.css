@@ -1,0 +1,19 @@
+.typing-cat-container {
+	position: fixed;
+	left: var(--tci-left, 12px);
+	bottom: var(--tci-bottom, 12px);
+	z-index: 9999;
+	opacity: var(--tci-opacity, 1);
+	pointer-events: var(--tci-pointer-events, none);
+}
+
+.typing-cat-container img {
+	width: var(--tci-width, 160px);
+	height: auto;
+	display: block;
+	user-select: none;
+}
+
+.typing-cat-container.tci-hidden {
+	display: none;
+}
