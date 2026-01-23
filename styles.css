@@ -18,3 +18,15 @@
 .typing-cat-container.tci-hidden {
 	display: none;
 }
+
+.typing-cat-image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	opacity: 0;
+}
+
+.typing-cat-image.idle {
+	position: relative;
+	opacity: 1;
+}

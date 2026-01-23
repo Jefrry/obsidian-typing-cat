@@ -11,17 +11,13 @@ import { DEFAULT_SETTINGS, TypingCatSettingTab, TypingCatSettings } from "./sett
 interface ImageConfig {
 	src: string;
 	alt: string;
-	opacity: string;
 	key: string;
-	position: string;
-	top: string;
-	left: string;
 }
 
 const IMAGE_CONFIGS: ImageConfig[] = [
-	{ src: catIdle, alt: "Cat idle", opacity: "1", key: "idle", position: "relative", top: "0", left: "0" },
-	{ src: catLeft, alt: "Cat left", opacity: "0", key: "left", position: "absolute", top: "0", left: "0" },
-	{ src: catRight, alt: "Cat right", opacity: "0", key: "right", position: "absolute", top: "0", left: "0" },
+	{ src: catIdle, alt: "Cat idle", key: "idle", },
+	{ src: catLeft, alt: "Cat left", key: "left", },
+	{ src: catRight, alt: "Cat right", key: "right", },
 ]
 
 export default class TypingCatImagePlugin extends Plugin {
@@ -45,8 +41,9 @@ export default class TypingCatImagePlugin extends Plugin {
 	private injectOverlay() {
 		if (this.overlayEl) return;
 
-		const overlay = document.createElement("div");
-		overlay.className = "typing-cat-container";
+		const overlay = activeDocument.body.createEl("div", {
+			cls: "typing-cat-container",
+		});
 
 		overlay.style.setProperty("--tci-left", `${this.settings.leftPercent}vw`);
 		overlay.style.setProperty("--tci-bottom", `${this.settings.bottomPercent}vh`);
@@ -56,20 +53,18 @@ export default class TypingCatImagePlugin extends Plugin {
 		overlay.style.setProperty("--tci-transform", this.settings.mirror ? "scaleX(-1)" : "none");
 
 		IMAGE_CONFIGS.forEach((config) => {
-			const img = document.createElement("img");
-			img.alt = config.alt;
-			img.draggable = false;
-			img.style.position = config.position;
-			img.style.top = config.top;
-			img.style.left = config.left;
-			img.style.opacity = config.opacity;
-			img.src = config.src;
+			const img = overlay.createEl("img", {
+				cls: `typing-cat-image ${config.key}`,
+				attr: {
+					src: config.src,
+					alt: config.alt,
+					draggable: "false",
+				},
+			});
 
-			overlay.appendChild(img);
 			this.imageElements.set(config.key, img);
 		});
 
-		document.body.appendChild(overlay);
 		this.overlayEl = overlay;
 	}
 
