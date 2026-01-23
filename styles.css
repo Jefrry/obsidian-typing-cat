@@ -1,14 +1,15 @@
 .typing-cat-container {
 	position: fixed;
-	left: var(--tci-left, 12px);
-	bottom: var(--tci-bottom, 12px);
+	left: var(--tci-left, 2%);
+	bottom: var(--tci-bottom, 2%);
 	z-index: 9999;
 	opacity: var(--tci-opacity, 1);
 	pointer-events: var(--tci-pointer-events, none);
+	transform: var(--tci-transform, none);
 }
 
 .typing-cat-container img {
-	width: var(--tci-width, 160px);
+	width: var(--tci-width, 10%);
 	height: auto;
 	display: block;
 	user-select: none;

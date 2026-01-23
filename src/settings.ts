@@ -2,19 +2,21 @@ import { PluginSettingTab, App, Setting } from "obsidian";
 import TypingCatImagePlugin from "./main";
 
 export interface TypingCatSettings {
-	widthPx: number;
-	marginLeftPx: number;
-	marginBottomPx: number;
+	widthPercent: number;
+	leftPercent: number;
+	bottomPercent: number;
 	opacity: number;
 	clickable: boolean;
+	mirror: boolean;
 }
 
 export const DEFAULT_SETTINGS: TypingCatSettings = {
-	widthPx: 160,
-	marginLeftPx: 12,
-	marginBottomPx: 12,
+	widthPercent: 10,
+	leftPercent: 2,
+	bottomPercent: 2,
 	opacity: 1,
 	clickable: false,
+	mirror: false,
 };
 
 export class TypingCatSettingTab extends PluginSettingTab {
@@ -32,49 +34,50 @@ export class TypingCatSettingTab extends PluginSettingTab {
 		containerEl.createEl("h2", { text: "Corner Overlay Image" });
 
 		new Setting(containerEl)
-			.setName("Ширина (px)")
-			.addText((s) =>
+			.setName("Width (%)")
+			.setDesc("Width as a percentage of the window width")
+			.addSlider((s) =>
 				s
-					.setValue(this.plugin.settings.widthPx.toString())
+					.setLimits(1, 100, 1)
+					.setValue(this.plugin.settings.widthPercent)
+					.setDynamicTooltip()
 					.onChange(async (v) => {
-						const num = Number(v);
-						if (!isNaN(num)) {
-							this.plugin.settings.widthPx = num;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
-		new Setting(containerEl)
-			.setName("Отступ слева (px)")
-			.addText((s) =>
-				s
-					.setValue(this.plugin.settings.marginLeftPx.toString())
-					.onChange(async (v) => {
-						const num = Number(v);
-						if (!isNaN(num)) {
-							this.plugin.settings.marginLeftPx = num;
-							await this.plugin.saveSettings();
-						}
+						this.plugin.settings.widthPercent = v;
+						await this.plugin.saveSettings();
 					})
 			);
 
 		new Setting(containerEl)
-			.setName("Отступ снизу (px)")
-			.addText((s) =>
+			.setName("Left Position (%)")
+			.setDesc("Distance from the left edge as a percentage")
+			.addSlider((s) =>
 				s
-					.setValue(this.plugin.settings.marginBottomPx.toString())
+					.setLimits(0, 100, 1)
+					.setValue(this.plugin.settings.leftPercent)
+					.setDynamicTooltip()
 					.onChange(async (v) => {
-						const num = Number(v);
-						if (!isNaN(num)) {
-							this.plugin.settings.marginBottomPx = num;
-							await this.plugin.saveSettings();
-						}
+						this.plugin.settings.leftPercent = v;
+						await this.plugin.saveSettings();
 					})
 			);
 
 		new Setting(containerEl)
-			.setName("Прозрачность")
-			.setDesc("0 — полностью прозрачная, 1 — полностью видимая")
+			.setName("Bottom Position (%)")
+			.setDesc("Distance from the bottom edge as a percentage")
+			.addSlider((s) =>
+				s
+					.setLimits(0, 100, 1)
+					.setValue(this.plugin.settings.bottomPercent)
+					.setDynamicTooltip()
+					.onChange(async (v) => {
+						this.plugin.settings.bottomPercent = v;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Opacity")
+			.setDesc("0 — fully transparent, 1 — fully visible")
 			.addSlider((s) =>
 				s
 					.setLimits(0, 1, 0.05)
@@ -87,11 +90,21 @@ export class TypingCatSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Кликабельная")
-			.setDesc("Если выключено — клики проходят “сквозь” картинку.")
+			.setName("Clickable")
+			.setDesc("If off, clicks pass through the image.")
 			.addToggle((t) =>
 				t.setValue(this.plugin.settings.clickable).onChange(async (v) => {
 					this.plugin.settings.clickable = v;
+					await this.plugin.saveSettings();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName("Mirror Cat")
+			.setDesc("Flip the image horizontally.")
+			.addToggle((t) =>
+				t.setValue(this.plugin.settings.mirror).onChange(async (v) => {
+					this.plugin.settings.mirror = v;
 					await this.plugin.saveSettings();
 				})
 			);

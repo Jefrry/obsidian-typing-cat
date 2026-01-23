@@ -48,11 +48,12 @@ export default class TypingCatImagePlugin extends Plugin {
 		const overlay = document.createElement("div");
 		overlay.className = "typing-cat-container";
 
-		overlay.style.setProperty("--tci-left", `${this.settings.marginLeftPx}px`);
-		overlay.style.setProperty("--tci-bottom", `${this.settings.marginBottomPx}px`);
+		overlay.style.setProperty("--tci-left", `${this.settings.leftPercent}vw`);
+		overlay.style.setProperty("--tci-bottom", `${this.settings.bottomPercent}vh`);
 		overlay.style.setProperty("--tci-opacity", `${this.settings.opacity}`);
-		overlay.style.setProperty("--tci-width", `${this.settings.widthPx}px`);
+		overlay.style.setProperty("--tci-width", `${this.settings.widthPercent}vw`);
 		overlay.style.setProperty("--tci-pointer-events", this.settings.clickable ? "auto" : "none");
+		overlay.style.setProperty("--tci-transform", this.settings.mirror ? "scaleX(-1)" : "none");
 
 		IMAGE_CONFIGS.forEach((config) => {
 			const img = document.createElement("img");
@@ -87,11 +88,12 @@ export default class TypingCatImagePlugin extends Plugin {
 	private applyStylesFromSettings() {
 		if (!this.overlayEl) return;
 
-		this.overlayEl.style.setProperty("--tci-left", `${this.settings.marginLeftPx}px`);
-		this.overlayEl.style.setProperty("--tci-bottom", `${this.settings.marginBottomPx}px`);
+		this.overlayEl.style.setProperty("--tci-left", `${this.settings.leftPercent}vw`);
+		this.overlayEl.style.setProperty("--tci-bottom", `${this.settings.bottomPercent}vh`);
 		this.overlayEl.style.setProperty("--tci-opacity", `${this.settings.opacity}`);
-		this.overlayEl.style.setProperty("--tci-width", `${this.settings.widthPx}px`);
+		this.overlayEl.style.setProperty("--tci-width", `${this.settings.widthPercent}vw`);
 		this.overlayEl.style.setProperty("--tci-pointer-events", this.settings.clickable ? "auto" : "none");
+		this.overlayEl.style.setProperty("--tci-transform", this.settings.mirror ? "scaleX(-1)" : "none");
 	}
 
 	private async renderImage() {
