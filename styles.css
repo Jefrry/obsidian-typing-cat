@@ -30,3 +30,11 @@
 	position: relative;
 	opacity: 1;
 }
+
+.typing-cat-image.is-active {
+	opacity: 1;
+}
+
+.typing-cat-image.is-hidden {
+	opacity: 0;
+}

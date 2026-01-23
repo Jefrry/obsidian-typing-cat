@@ -1,8 +1,4 @@
-import {
-	Plugin,
-	TFile,
-	normalizePath,
-} from "obsidian";
+import { Plugin } from "obsidian";
 import { catIdle } from "./images/cat-idle";
 import { catLeft } from "./images/cat-left";
 import { catRight } from "./images/cat-right";
@@ -28,7 +24,7 @@ export default class TypingCatImagePlugin extends Plugin {
 	private lastHand: "left" | "right" = "right";
 
 	async onload() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<TypingCatSettings>);
 
 		this.injectOverlay();
 		await this.renderImage();
@@ -46,7 +42,7 @@ export default class TypingCatImagePlugin extends Plugin {
 	private injectOverlay() {
 		if (this.overlayEl) return;
 
-		const overlay = activeDocument.body.createEl("div", {
+		const overlay = document.body.createEl("div", {
 			cls: "typing-cat-container",
 		});
 
@@ -118,22 +114,22 @@ export default class TypingCatImagePlugin extends Plugin {
 			window.clearTimeout(this.typingTimeout);
 		}
 
-		idle.style.opacity = "0";
+		idle.addClass("is-hidden");
 
 		if (this.lastHand === "right") {
-			left.style.opacity = "1";
-			right.style.opacity = "0";
+			left.addClass("is-active");
+			right.removeClass("is-active");
 			this.lastHand = "left";
 		} else {
-			left.style.opacity = "0";
-			right.style.opacity = "1";
+			left.removeClass("is-active");
+			right.addClass("is-active");
 			this.lastHand = "right";
 		}
 
 		this.typingTimeout = window.setTimeout(() => {
-			idle.style.opacity = "1";
-			left.style.opacity = "0";
-			right.style.opacity = "0";
+			idle.removeClass("is-hidden");
+			left.removeClass("is-active");
+			right.removeClass("is-active");
 
 			this.typingTimeout = null;
 		}, 1000);

@@ -31,7 +31,7 @@ export class TypingCatSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Corner Overlay Image" });
+		new Setting(containerEl).setName("Corner overlay image").setHeading();
 
 		new Setting(containerEl)
 			.setName("Width (%)")
@@ -48,7 +48,7 @@ export class TypingCatSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Left Position (%)")
+			.setName("Left position (%)")
 			.setDesc("Distance from the left edge as a percentage")
 			.addSlider((s) =>
 				s
@@ -62,7 +62,7 @@ export class TypingCatSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Bottom Position (%)")
+			.setName("Bottom position (%)")
 			.setDesc("Distance from the bottom edge as a percentage")
 			.addSlider((s) =>
 				s
@@ -100,7 +100,7 @@ export class TypingCatSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Mirror Cat")
+			.setName("Mirror cat")
 			.setDesc("Flip the image horizontally.")
 			.addToggle((t) =>
 				t.setValue(this.plugin.settings.mirror).onChange(async (v) => {
