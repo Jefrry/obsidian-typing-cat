@@ -24,6 +24,8 @@ export default class TypingCatImagePlugin extends Plugin {
 	settings: TypingCatSettings;
 	private overlayEl?: HTMLDivElement;
 	private imageElements: Map<string, HTMLImageElement> = new Map();
+	private typingTimeout: number | null = null;
+	private lastHand: "left" | "right" = "right";
 
 	async onload() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -32,9 +34,12 @@ export default class TypingCatImagePlugin extends Plugin {
 		await this.renderImage();
 
 		this.addSettingTab(new TypingCatSettingTab(this.app, this));
+
+		this.registerEvent(this.app.workspace.on("editor-change", this.onTyping));
 	}
 
 	onunload() {
+		if (this.typingTimeout) window.clearTimeout(this.typingTimeout);
 		this.destroyOverlay();
 	}
 
@@ -101,5 +106,37 @@ export default class TypingCatImagePlugin extends Plugin {
 			}
 		});
 	}
+
+	private onTyping = () => {
+		const idle = this.imageElements.get("idle");
+		const left = this.imageElements.get("left");
+		const right = this.imageElements.get("right");
+
+		if (!idle || !left || !right) return;
+
+		if (this.typingTimeout) {
+			window.clearTimeout(this.typingTimeout);
+		}
+
+		idle.style.opacity = "0";
+
+		if (this.lastHand === "right") {
+			left.style.opacity = "1";
+			right.style.opacity = "0";
+			this.lastHand = "left";
+		} else {
+			left.style.opacity = "0";
+			right.style.opacity = "1";
+			this.lastHand = "right";
+		}
+
+		this.typingTimeout = window.setTimeout(() => {
+			idle.style.opacity = "1";
+			left.style.opacity = "0";
+			right.style.opacity = "0";
+
+			this.typingTimeout = null;
+		}, 1000);
+	};
 }
 
