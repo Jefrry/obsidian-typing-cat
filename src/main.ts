@@ -2,6 +2,7 @@ import { Plugin } from "obsidian";
 import { catIdle } from "./images/cat-idle";
 import { catLeft } from "./images/cat-left";
 import { catRight } from "./images/cat-right";
+import { heart } from "./images/heart";
 import { DEFAULT_SETTINGS, TypingCatSettingTab, TypingCatSettings } from "./settings";
 
 interface ImageConfig {
@@ -22,6 +23,9 @@ export default class TypingCatImagePlugin extends Plugin {
 	private imageElements: Map<string, HTMLImageElement> = new Map();
 	private typingTimeout: number | null = null;
 	private lastHand: "left" | "right" = "right";
+	private heartEl?: HTMLImageElement;
+	private lastHeartTime = 0;
+	private readonly HEART_THROTTLE = 500; // ms
 
 	async onload() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<TypingCatSettings>);
@@ -66,7 +70,38 @@ export default class TypingCatImagePlugin extends Plugin {
 			this.imageElements.set(config.key, img);
 		});
 
+		this.heartEl = overlay.createEl("img", {
+			cls: "typing-cat-heart",
+			attr: {
+				src: heart,
+				alt: "Heart",
+				draggable: "false",
+			},
+		});
+
+		if (!this.settings.clickable) {
+			this.heartEl.addClass("tci-hidden");
+		}
+
+		overlay.addEventListener("click", () => {
+			if (!this.settings.clickable) return;
+			this.playHeartAnimation();
+		});
+
 		this.overlayEl = overlay;
+	}
+
+	private playHeartAnimation() {
+		if (!this.heartEl) return;
+
+		const now = Date.now();
+		if (now - this.lastHeartTime < this.HEART_THROTTLE) return;
+
+		this.lastHeartTime = now;
+		
+		this.heartEl.removeClass("animate");
+		this.heartEl!.offsetWidth; // reflow to restart animation
+		this.heartEl.addClass("animate");
 	}
 
 	private destroyOverlay() {
@@ -90,6 +125,14 @@ export default class TypingCatImagePlugin extends Plugin {
 		this.overlayEl.style.setProperty("--tci-width", `${this.settings.widthPercent}vw`);
 		this.overlayEl.style.setProperty("--tci-pointer-events", this.settings.clickable ? "auto" : "none");
 		this.overlayEl.style.setProperty("--tci-transform", this.settings.mirror ? "scaleX(-1)" : "none");
+
+		if (this.heartEl) {
+			if (this.settings.clickable) {
+				this.heartEl.removeClass("tci-hidden");
+			} else {
+				this.heartEl.addClass("tci-hidden");
+			}
+		}
 	}
 
 	private async renderImage() {

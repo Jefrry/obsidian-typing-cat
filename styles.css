@@ -15,7 +15,7 @@
 	user-select: none;
 }
 
-.typing-cat-container.tci-hidden {
+.tci-hidden {
 	display: none;
 }
 
@@ -37,4 +37,38 @@
 
 .typing-cat-image.is-hidden {
 	opacity: 0;
+}
+
+.typing-cat-container .typing-cat-heart {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	opacity: 0;
+	pointer-events: none;
+	width: 50%;
+	z-index: 10000;
+}
+
+.typing-cat-heart.animate {
+	animation: heart-pop 0.6s ease-out forwards;
+}
+
+@keyframes heart-pop {
+	0% {
+		opacity: 0;
+		transform: translateX(-50%) translateY(0) scale(0.5);
+	}
+	20% {
+		opacity: 1;
+		transform: translateX(-50%) translateY(-20px) scale(1.5);
+	}
+	80% {
+		opacity: 0;
+		transform: translateX(-50%) translateY(-60px) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
 }
