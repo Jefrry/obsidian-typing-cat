@@ -210,7 +210,7 @@ export default class TypingCatImagePlugin extends Plugin {
 		this.lastHeartTime = now;
 		
 		this.heartEl.removeClass("animate");
-		this.heartEl!.offsetWidth; // reflow to restart animation
+		void this.heartEl.offsetWidth; // reflow to restart animation
 		this.heartEl.addClass("animate");
 	}
 

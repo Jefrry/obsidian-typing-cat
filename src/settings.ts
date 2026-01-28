@@ -119,7 +119,7 @@ export class TypingCatSettingTab extends PluginSettingTab {
 				})
 			);
 
-		new Setting(containerEl).setName("Typing Speed").setHeading();
+		new Setting(containerEl).setName("Typing speed").setHeading();
 
 		new Setting(containerEl)
 			.setName("Show speed")
