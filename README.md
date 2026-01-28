@@ -2,6 +2,8 @@
 
 A cozy typing cat for Obsidian that keeps you company and tracks your typing speed.
 
+![](./public/banner.png)
+
 ## Features
 
 - **Cozy Companion**: A cute cat overlay that types along with you in real-time.
