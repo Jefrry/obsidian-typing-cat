@@ -3,6 +3,7 @@ import { catIdle } from "./images/cat-idle";
 import { catLeft } from "./images/cat-left";
 import { catRight } from "./images/cat-right";
 import { heart } from "./images/heart";
+import { sweat } from "./images/sweat";
 import { DEFAULT_SETTINGS, TypingCatSettingTab, TypingCatSettings } from "./settings";
 
 interface ImageConfig {
@@ -24,8 +25,11 @@ export default class TypingCatImagePlugin extends Plugin {
 	private typingTimeout: number | null = null;
 	private lastHand: "left" | "right" = "right";
 	private heartEl?: HTMLImageElement;
+	private sweatEl?: HTMLImageElement;
 	private lastHeartTime = 0;
+	private typingSessionStart: number | null = null;
 	private readonly HEART_THROTTLE = 500; // ms
+	private readonly SWEAT_DELAY = 3000; // ms
 
 	async onload() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<TypingCatSettings>);
@@ -75,6 +79,15 @@ export default class TypingCatImagePlugin extends Plugin {
 			attr: {
 				src: heart,
 				alt: "Heart",
+				draggable: "false",
+			},
+		});
+
+		this.sweatEl = overlay.createEl("img", {
+			cls: "typing-cat-sweat",
+			attr: {
+				src: sweat,
+				alt: "Sweat",
 				draggable: "false",
 			},
 		});
@@ -146,12 +159,22 @@ export default class TypingCatImagePlugin extends Plugin {
 		});
 	}
 
+	// TODO: Refactor it to move each feature to separate functions
 	private onTyping = () => {
 		const idle = this.imageElements.get("idle");
 		const left = this.imageElements.get("left");
 		const right = this.imageElements.get("right");
 
 		if (!idle || !left || !right) return;
+
+		if (this.typingSessionStart === null) {
+			this.typingSessionStart = Date.now();
+		}
+
+		const elapsed = Date.now() - this.typingSessionStart;
+		if (elapsed > this.SWEAT_DELAY && this.sweatEl) {
+			this.sweatEl.addClass("is-active");
+		}
 
 		if (this.typingTimeout) {
 			window.clearTimeout(this.typingTimeout);
@@ -173,6 +196,11 @@ export default class TypingCatImagePlugin extends Plugin {
 			idle.removeClass("is-hidden");
 			left.removeClass("is-active");
 			right.removeClass("is-active");
+
+			if (this.sweatEl) {
+				this.sweatEl.removeClass("is-active");
+			}
+			this.typingSessionStart = null;
 
 			this.typingTimeout = null;
 		}, 1000);

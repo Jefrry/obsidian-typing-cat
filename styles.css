@@ -46,12 +46,26 @@
 	transform: translateX(-50%);
 	opacity: 0;
 	pointer-events: none;
-	width: 50%;
+	width: 40%;
 	z-index: 10000;
 }
 
 .typing-cat-heart.animate {
 	animation: heart-pop 0.6s ease-out forwards;
+}
+
+.typing-cat-container .typing-cat-sweat {
+	position: absolute;
+	top: 0;
+	right: 0;
+	opacity: 0;
+	width: 55%;
+	transition: opacity 0.3s ease;
+	z-index: 10001;
+}
+
+.typing-cat-sweat.is-active {
+	opacity: 1;
 }
 
 @keyframes heart-pop {
