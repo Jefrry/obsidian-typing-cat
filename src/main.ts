@@ -267,7 +267,6 @@ export default class TypingCatImagePlugin extends Plugin {
 		});
 	}
 
-	// TODO: Refactor it to move each feature to separate functions
 	private onTyping = () => {
 		const idle = this.imageElements.get("idle");
 		const left = this.imageElements.get("left");
@@ -275,6 +274,12 @@ export default class TypingCatImagePlugin extends Plugin {
 
 		if (!idle || !left || !right) return;
 
+		this.updateSweat();
+		this.toggleHands(idle, left, right);
+		this.scheduleIdleReset(idle, left, right);
+	};
+
+	private updateSweat() {
 		if (this.typingSessionStart === null) {
 			this.typingSessionStart = Date.now();
 		}
@@ -283,11 +288,9 @@ export default class TypingCatImagePlugin extends Plugin {
 		if (elapsed > this.SWEAT_DELAY && this.sweatEl) {
 			this.sweatEl.addClass("is-active");
 		}
+	}
 
-		if (this.typingTimeout) {
-			window.clearTimeout(this.typingTimeout);
-		}
-
+	private toggleHands(idle: HTMLElement, left: HTMLElement, right: HTMLElement) {
 		idle.addClass("is-hidden");
 
 		if (this.lastHand === "right") {
@@ -299,19 +302,28 @@ export default class TypingCatImagePlugin extends Plugin {
 			right.addClass("is-active");
 			this.lastHand = "right";
 		}
+	}
+
+	private scheduleIdleReset(idle: HTMLElement, left: HTMLElement, right: HTMLElement) {
+		if (this.typingTimeout) {
+			window.clearTimeout(this.typingTimeout);
+		}
 
 		this.typingTimeout = window.setTimeout(() => {
-			idle.removeClass("is-hidden");
-			left.removeClass("is-active");
-			right.removeClass("is-active");
-
-			if (this.sweatEl) {
-				this.sweatEl.removeClass("is-active");
-			}
-			this.typingSessionStart = null;
-
-			this.typingTimeout = null;
+			this.resetToIdle(idle, left, right);
 		}, 1000);
-	};
+	}
+
+	private resetToIdle(idle: HTMLElement, left: HTMLElement, right: HTMLElement) {
+		idle.removeClass("is-hidden");
+		left.removeClass("is-active");
+		right.removeClass("is-active");
+
+		if (this.sweatEl) {
+			this.sweatEl.removeClass("is-active");
+		}
+		this.typingSessionStart = null;
+		this.typingTimeout = null;
+	}
 }
 
