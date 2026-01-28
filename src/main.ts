@@ -4,7 +4,7 @@ import { catLeft } from "./images/cat-left";
 import { catRight } from "./images/cat-right";
 import { heart } from "./images/heart";
 import { sweat } from "./images/sweat";
-import { DEFAULT_SETTINGS, TypingCatSettingTab, TypingCatSettings } from "./settings";
+import { DEFAULT_SETTINGS, TypingCatSettingTab, TypingCatSettings, SpeedMetric } from "./settings";
 
 interface ImageConfig {
 	src: string;
@@ -21,6 +21,8 @@ const IMAGE_CONFIGS: ImageConfig[] = [
 export default class TypingCatImagePlugin extends Plugin {
 	settings: TypingCatSettings;
 	private overlayEl?: HTMLDivElement;
+	private speedOverlayEl?: HTMLDivElement;
+	private speedTextEl?: HTMLDivElement;
 	private imageElements: Map<string, HTMLImageElement> = new Map();
 	private typingTimeout: number | null = null;
 	private lastHand: "left" | "right" = "right";
@@ -31,6 +33,11 @@ export default class TypingCatImagePlugin extends Plugin {
 	private readonly HEART_THROTTLE = 500; // ms
 	private readonly SWEAT_DELAY = 3000; // ms
 
+	private typed: number[] = [0];
+	private keyTypedInSecond = 0;
+	private wordTypedInSecond = 0;
+	private readonly pollingInterval = 1.0;
+
 	async onload() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<TypingCatSettings>);
 
@@ -40,6 +47,81 @@ export default class TypingCatImagePlugin extends Plugin {
 		this.addSettingTab(new TypingCatSettingTab(this.app, this));
 
 		this.registerEvent(this.app.workspace.on("editor-change", this.onTyping));
+
+		this.registerDomEvent(document, "keydown", (evt: KeyboardEvent) => {
+			if (!this.settings.showSpeed) return;
+
+			// Check if it's a single printable character
+			if (evt.key.length === 1 && !evt.ctrlKey && !evt.altKey && !evt.metaKey) {
+				this.keyTypedInSecond += 1;
+				this.wordTypedInSecond += 1 / 5.0;
+			}
+		});
+
+		this.registerInterval(
+			window.setInterval(() => {
+				if (!this.settings.showSpeed || !this.speedTextEl) return;
+
+				let added = 0;
+				if (this.settings.speedMetric === SpeedMetric.CPS || this.settings.speedMetric === SpeedMetric.CPM) {
+					added = this.keyTypedInSecond;
+					this.keyTypedInSecond = 0;
+				} else if (this.settings.speedMetric === SpeedMetric.WPM) {
+					added = this.wordTypedInSecond;
+					this.wordTypedInSecond = 0;
+				}
+
+				if (!this.hasStoppedTyping() || added != 0) {
+					if (this.hasStoppedTyping()) {
+						this.typed = [];
+					}
+
+					if (this.typed.length > this.pollingInterval * 10) {
+						this.typed.shift();
+						this.typed.push(added);
+					} else {
+						this.typed.push(added);
+					}
+
+					const fact = this.getMetricFactor(this.settings.speedMetric);
+					const average = Math.round(this.averageArray(this.typed) * fact);
+					this.speedTextEl.setText(`${average} ${this.settings.speedMetric}`);
+				}
+			}, 1000 / this.pollingInterval)
+		);
+	}
+
+	private getMetricFactor(metric: SpeedMetric): number {
+		switch (metric) {
+			case SpeedMetric.CPM:
+			case SpeedMetric.WPM:
+				return 60.0;
+			case SpeedMetric.CPS:
+				return 1.0;
+			default:
+				return 60.0;
+		}
+	}
+
+	private averageArray(array: number[]): number {
+		const avg = array.reduce((a: number, b: number) => a + b, 0);
+		return avg / array.length || 0;
+	}
+
+	private hasStoppedTyping(): boolean {
+		const second_check = 2 * this.pollingInterval;
+		const check_start = this.typed.length - second_check;
+
+		if (check_start < 0) {
+			return false;
+		}
+
+		for (let i = check_start; i < this.typed.length; i++) {
+			if (this.typed[i] != 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	onunload() {
@@ -92,6 +174,21 @@ export default class TypingCatImagePlugin extends Plugin {
 			},
 		});
 
+		this.speedOverlayEl = overlay.createEl("div", {
+			cls: "typing-cat-speed-overlay",
+		});
+
+		this.speedTextEl = this.speedOverlayEl.createEl("div", {
+			cls: "typing-cat-speed-text",
+			text: `0 ${this.settings.speedMetric}`,
+		});
+
+		this.speedTextEl.style.setProperty("--tci-transform", this.settings.mirror ? "scaleX(-1)" : "none");
+
+		if (!this.settings.showSpeed) {
+			this.speedOverlayEl.addClass("tci-hidden");
+		}
+
 		if (!this.settings.clickable) {
 			this.heartEl.addClass("tci-hidden");
 		}
@@ -125,11 +222,11 @@ export default class TypingCatImagePlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		this.applyStylesFromSettings();
+		this.updateUIFromSettings();
 		await this.renderImage();
 	}
 
-	private applyStylesFromSettings() {
+	private updateUIFromSettings() {
 		if (!this.overlayEl) return;
 
 		this.overlayEl.style.setProperty("--tci-left", `${this.settings.leftPercent}vw`);
@@ -145,6 +242,17 @@ export default class TypingCatImagePlugin extends Plugin {
 			} else {
 				this.heartEl.addClass("tci-hidden");
 			}
+		}
+
+		if (!this.speedOverlayEl || !this.speedTextEl) return;
+
+		this.speedTextEl.style.setProperty("--tci-transform", this.settings.mirror ? "scaleX(-1)" : "none");
+		this.speedTextEl.setText(`0 ${this.settings.speedMetric}`);
+
+		if (this.settings.showSpeed) {
+			this.speedOverlayEl.removeClass("tci-hidden");
+		} else {
+			this.speedOverlayEl.addClass("tci-hidden");
 		}
 	}
 

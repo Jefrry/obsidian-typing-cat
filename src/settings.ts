@@ -1,6 +1,12 @@
 import { PluginSettingTab, App, Setting } from "obsidian";
 import TypingCatImagePlugin from "./main";
 
+export enum SpeedMetric {
+	WPM = "wpm",
+	CPM = "cpm",
+	CPS = "cps",
+}
+
 export interface TypingCatSettings {
 	widthPercent: number;
 	leftPercent: number;
@@ -8,6 +14,8 @@ export interface TypingCatSettings {
 	opacity: number;
 	clickable: boolean;
 	mirror: boolean;
+	showSpeed: boolean;
+	speedMetric: SpeedMetric;
 }
 
 export const DEFAULT_SETTINGS: TypingCatSettings = {
@@ -17,6 +25,8 @@ export const DEFAULT_SETTINGS: TypingCatSettings = {
 	opacity: 1,
 	clickable: false,
 	mirror: false,
+	showSpeed: true,
+	speedMetric: SpeedMetric.WPM,
 };
 
 export class TypingCatSettingTab extends PluginSettingTab {
@@ -107,6 +117,33 @@ export class TypingCatSettingTab extends PluginSettingTab {
 					this.plugin.settings.mirror = v;
 					await this.plugin.saveSettings();
 				})
+			);
+
+		new Setting(containerEl).setName("Typing Speed").setHeading();
+
+		new Setting(containerEl)
+			.setName("Show speed")
+			.setDesc("Show typing speed counter.")
+			.addToggle((t) =>
+				t.setValue(this.plugin.settings.showSpeed).onChange(async (v) => {
+					this.plugin.settings.showSpeed = v;
+					await this.plugin.saveSettings();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName("Typing speed metric")
+			.setDesc("Choose which metric to use for typing speed.")
+			.addDropdown((d) =>
+				d
+					.addOption(SpeedMetric.WPM, "Words per minute")
+					.addOption(SpeedMetric.CPS, "Characters per second")
+					.addOption(SpeedMetric.CPM, "Characters per minute")
+					.setValue(this.plugin.settings.speedMetric)
+					.onChange(async (v) => {
+						this.plugin.settings.speedMetric = v as SpeedMetric;
+						await this.plugin.saveSettings();
+					})
 			);
 	}
 }
