@@ -1,7 +1,7 @@
 {
 	"name": "typing-cat",
 	"version": "1.0.0",
-	"description": "A cozy typing cat",
+	"description": "A cozy typing cat that keeps you company and tracks your typing speed.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {

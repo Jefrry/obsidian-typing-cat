@@ -3,7 +3,7 @@
 	"name": "Typing Cat",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A cozy typing cat",
+	"description": "A cozy typing cat that keeps you company and tracks your typing speed.",
 	"author": "Egor Ilin",
 	"authorUrl": "https://github.com/Jefrry",
 	"isDesktopOnly": true
