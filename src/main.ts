@@ -42,7 +42,7 @@ export default class TypingCatImagePlugin extends Plugin {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<TypingCatSettings>);
 
 		this.injectOverlay();
-		await this.renderImage();
+		this.renderImage();
 
 		this.addSettingTab(new TypingCatSettingTab(this.app, this));
 
@@ -223,7 +223,7 @@ export default class TypingCatImagePlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 		this.updateUIFromSettings();
-		await this.renderImage();
+		this.renderImage();
 	}
 
 	private updateUIFromSettings() {
@@ -256,7 +256,7 @@ export default class TypingCatImagePlugin extends Plugin {
 		}
 	}
 
-	private async renderImage() {
+	private renderImage() {
 		if (this.imageElements.size === 0) return;
 
 		IMAGE_CONFIGS.forEach((config) => {
